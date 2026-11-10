@@ -1,0 +1,43 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Assignment Submission Portal Demo</title>
+  <style>
+    body { font: 16px system-ui, sans-serif; max-width: 720px; margin: 3rem auto; padding: 0 1rem; color: #172554; }
+    form, .notice { padding: 1.25rem; border: 1px solid #bfdbfe; border-radius: .75rem; background: #eff6ff; }
+    label, input, button { display: block; width: 100%; margin-top: .6rem; }
+    input, button { box-sizing: border-box; padding: .7rem; }
+    button { margin-top: 1rem; cursor: pointer; }
+    #message { margin-top: 1rem; }
+  </style>
+</head>
+<body>
+  <h1>Assignment Submission Portal</h1>
+  <p>This static GitHub Pages demo validates submission fields in your browser.</p>
+  <form id="submission-form">
+    <label>Student name<input name="student_name" required></label>
+    <label>Registration number<input name="registration_number" required></label>
+    <label>Assignment title<input name="assignment_title" required></label>
+    <label>Submission URL<input name="submission_url" type="url" required></label>
+    <button type="submit">Validate submission</button>
+  </form>
+  <p id="message" class="notice" hidden></p>
+  <script>
+    document.querySelector("form").addEventListener("submit", (event) => {
+      event.preventDefault();
+      const url = new FormData(event.currentTarget).get("submission_url");
+      const message = document.querySelector("#message");
+      try {
+        const parsed = new URL(url);
+        if (!["http:", "https:"].includes(parsed.protocol)) throw new Error();
+        message.textContent = "Submission details are valid. Use the Flask app to save them.";
+      } catch {
+        message.textContent = "Enter a valid HTTP or HTTPS submission URL.";
+      }
+      message.hidden = false;
+    });
+  </script>
+</body>
+</html>
