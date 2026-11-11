@@ -36,7 +36,7 @@ def create_app(test_config=None):
         try:
             parsed = urlparse(value)
             return (
-                parsed.scheme in ("http", "https")
+                parsed.scheme in ("http",)
                 and bool(parsed.netloc)
                 and "." in parsed.netloc
             )
