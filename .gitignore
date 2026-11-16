@@ -5,3 +5,4 @@ __pycache__/
 .env
 testreport.json
 reports/testreport.json
+submissions.db
