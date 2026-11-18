@@ -274,7 +274,17 @@ Add the following secrets to GitHub Actions:
 | `EMAIL_PASSWORD` | Gmail App Password (not your login password) |
 | `EMAIL_RECIPIENT` | Address to receive the report |
 
-Extend `scripts/run_tests_and_report.py` to call `smtplib` after `send_report()`, attaching `testreport.json` and including commit SHA and test counts in the body.
+The report script sends an email after `send_report()` when all three email
+secrets are configured. It includes the commit SHA, pipeline result, test
+counts, and attaches `testreport.json`. If the email secrets are absent, email
+reporting is skipped and the normal test/receiver workflow is unchanged.
+
+Optional SMTP settings:
+
+```text
+SMTP_HOST=smtp.gmail.com
+SMTP_PORT=587
+```
 
 ---
 

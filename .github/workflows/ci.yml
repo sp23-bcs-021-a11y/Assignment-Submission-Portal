@@ -29,6 +29,11 @@ jobs:
         env:
           REPORT_RECEIVER_URL: ${{ secrets.REPORT_RECEIVER_URL }}
           REPORT_TOKEN: ${{ secrets.REPORT_TOKEN }}
+          EMAIL_SENDER: ${{ secrets.EMAIL_SENDER }}
+          EMAIL_PASSWORD: ${{ secrets.EMAIL_PASSWORD }}
+          EMAIL_RECIPIENT: ${{ secrets.EMAIL_RECIPIENT }}
+          SMTP_HOST: ${{ secrets.SMTP_HOST }}
+          SMTP_PORT: ${{ secrets.SMTP_PORT }}
         run: python scripts/run_tests_and_report.py
 
   deploy:

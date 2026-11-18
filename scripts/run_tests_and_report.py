@@ -2,11 +2,13 @@
 
 import json
 import os
+import smtplib
 import subprocess
 import sys
 import tempfile
 import urllib.request
 from datetime import datetime, timezone
+from email.message import EmailMessage
 from pathlib import Path
 from xml.etree import ElementTree
 
@@ -66,6 +68,52 @@ def send_report(report: dict) -> None:
     print(f"Report sent to {receiver_url}")
 
 
+def send_email_report(report: dict) -> None:
+    sender = os.environ.get("EMAIL_SENDER")
+    password = os.environ.get("EMAIL_PASSWORD")
+    recipient = os.environ.get("EMAIL_RECIPIENT")
+    if not any((sender, password, recipient)):
+        print("Email reporting is not configured; skipping email.")
+        return
+    if not all((sender, password, recipient)):
+        raise RuntimeError(
+            "EMAIL_SENDER, EMAIL_PASSWORD, and EMAIL_RECIPIENT must be set together."
+        )
+
+    message = EmailMessage()
+    message["Subject"] = (
+        f"Assignment Submission Portal tests: {report['overall_status']} "
+        f"({report['commit_sha']})"
+    )
+    message["From"] = sender
+    message["To"] = recipient
+    message.set_content(
+        "\n".join([
+            f"Repository: {report['repository']}",
+            f"Branch: {report['branch']}",
+            f"Commit: {report['commit_sha']}",
+            f"Pipeline run: {report['pipeline_run_id']}",
+            f"Status: {report['overall_status']}",
+            f"Tests: {report['total']} total, {report['passed']} passed, "
+            f"{report['failed']} failed",
+        ])
+    )
+    message.add_attachment(
+        json.dumps(report, indent=2).encode("utf-8"),
+        maintype="application",
+        subtype="json",
+        filename="testreport.json",
+    )
+
+    smtp_host = os.environ.get("SMTP_HOST", "smtp.gmail.com")
+    smtp_port = int(os.environ.get("SMTP_PORT", "587"))
+    with smtplib.SMTP(smtp_host, smtp_port, timeout=30) as smtp:
+        smtp.starttls()
+        smtp.login(sender, password)
+        smtp.send_message(message)
+    print(f"Email report sent to {recipient}")
+
+
 def main() -> int:
     with tempfile.TemporaryDirectory() as temporary_directory:
         xml_path = Path(temporary_directory) / "junit.xml"
@@ -79,6 +127,7 @@ def main() -> int:
             json.dumps(report, indent=2), encoding="utf-8"
         )
         send_report(report)
+        send_email_report(report)
         return result.returncode
 
 
